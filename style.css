@@ -1,15 +1,33 @@
-/* AI 早报 · 深色主题 */
+/* AI 早报 · 刊式主题
+   晨光纸面 / 墨色正文 / 朱砂点缀 —— 报纸编辑排印风格 */
+
 :root {
-  --bg: #0e1116;
-  --card: #161b23;
-  --border: #262e3a;
-  --text: #e8ecf1;
-  --muted: #98a2b3;
-  --faint: #6b7688;
-  --accent: #f2a93b;
-  --accent-soft: rgba(242, 169, 59, 0.12);
-  --link: #7db8f0;
-  --radius: 14px;
+  color-scheme: light dark;
+  --paper: #f7f3e9;
+  --ink: #221d13;
+  --ink-soft: #4a4435;
+  --muted: #8b8270;
+  --faint: #a89d87;
+  --hairline: rgba(34, 29, 19, 0.18);
+  --rule: #2a2519;
+  --accent: #b23a2c;
+  --serif: Georgia, "Times New Roman", "Songti SC", "STSong", SimSun,
+    "Noto Serif CJK SC", "Source Han Serif SC", serif;
+  --sans: -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB",
+    "Segoe UI", "Microsoft YaHei", "Noto Sans SC", sans-serif;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --paper: #16130e;
+    --ink: #e9e2d2;
+    --ink-soft: #c8c0ac;
+    --muted: #918977;
+    --faint: #6e675a;
+    --hairline: rgba(233, 226, 210, 0.16);
+    --rule: rgba(233, 226, 210, 0.78);
+    --accent: #cf5842;
+  }
 }
 
 * { box-sizing: border-box; }
@@ -18,181 +36,375 @@ html { -webkit-text-size-adjust: 100%; }
 
 body {
   margin: 0;
-  background: var(--bg);
-  color: var(--text);
-  font-family: -apple-system, BlinkMacSystemFont, "PingFang SC",
-    "Hiragino Sans GB", "Microsoft YaHei", "Noto Sans SC", sans-serif;
-  line-height: 1.8;
+  background-color: var(--paper);
+  /* 极淡的纸张颗粒 */
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");
+  color: var(--ink);
+  font-family: var(--sans);
   font-size: 16px;
+  line-height: 1.9;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
 }
 
-.topbar {
-  height: 3px;
-  background: linear-gradient(90deg, #f2a93b, #e2574c 55%, #7db8f0);
+::selection { background: var(--accent); color: var(--paper); }
+
+a:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+  border-radius: 2px;
 }
 
 .wrap {
-  max-width: 760px;
+  max-width: 720px;
   margin: 0 auto;
-  padding: 0 20px;
+  padding: 0 22px;
 }
 
-/* 页眉 */
-.site-header {
-  border-bottom: 1px solid var(--border);
-  padding: 18px 0;
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
 }
-.header-in {
-  display: flex;
-  align-items: baseline;
-  gap: 14px;
+
+/* ── 报头 ─────────────────────────────── */
+
+.masthead {
+  padding-top: 40px;
+  text-align: center;
 }
-.brand {
-  font-size: 22px;
-  font-weight: 800;
-  letter-spacing: 2px;
-  color: var(--text);
+.masthead-title {
+  margin: 0;
+  font-family: var(--serif);
+  font-size: 36px;
+  font-weight: 700;
+  line-height: 1.25;
+  letter-spacing: 12px;
+  text-indent: 12px; /* 抵消末字后字距，保持视觉居中 */
+}
+.masthead-title a {
+  color: inherit;
   text-decoration: none;
 }
-.brand::before {
-  content: "";
-  display: inline-block;
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
-  background: var(--accent);
-  margin-right: 10px;
-  vertical-align: 1px;
-}
-.tagline {
-  color: var(--faint);
-  font-size: 13px;
-  letter-spacing: 1px;
+.masthead-sub {
+  margin: 10px 0 0;
+  color: var(--muted);
+  font-family: var(--serif);
+  font-size: 12.5px;
+  letter-spacing: 5px;
+  text-indent: 5px;
 }
 
-/* 日期与标题 */
-.date-label {
-  color: var(--accent);
-  font-size: 13px;
-  letter-spacing: 2px;
-  margin: 36px 0 8px;
+/* 报头下的日期栏：粗线在上、细线收底，通栏，报纸版式 */
+.dateline {
+  margin-top: 28px;
+  border-top: 2.5px solid var(--rule);
+  border-bottom: 1px solid var(--rule);
 }
-.day-title {
-  font-size: 30px;
-  line-height: 1.4;
-  margin: 0 0 28px;
-  letter-spacing: 1px;
-}
-
-/* 资讯卡片 */
-.cards {
+.dateline-in {
   display: flex;
-  flex-direction: column;
-  gap: 18px;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 6px 14px;
+  flex-wrap: wrap;
+  padding-top: 9px;
+  padding-bottom: 8px;
+  font-family: var(--serif);
+  font-size: 14px;
+  letter-spacing: 1px;
+  color: var(--ink-soft);
 }
-.card {
+.dateline-right {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 10px;
+}
+.stamp {
+  color: var(--accent);
+  border: 1px solid currentColor;
+  border-radius: 3px;
+  padding: 1px 6px 1px 8px;
+  font-size: 12px;
+  letter-spacing: 3px;
+  text-indent: 3px;
+}
+
+/* ── 正文流 ───────────────────────────── */
+
+.stream { padding-bottom: 4px; }
+
+.story {
   position: relative;
-  background: var(--card);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  padding: 22px 24px 20px 72px;
+  display: grid;
+  grid-template-columns: 46px 1fr;
+  column-gap: 14px;
+  padding: 27px 0 25px;
 }
-.card .num {
-  position: absolute;
-  left: 22px;
-  top: 24px;
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  background: var(--accent-soft);
-  color: var(--accent);
-  font-weight: 700;
-  font-size: 15px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-.card h2 {
-  font-size: 18px;
-  line-height: 1.6;
-  margin: 0 0 10px;
-}
-.card p {
-  margin: 0 0 10px;
-  color: #c9d1dd;
-  font-size: 15px;
-  text-align: justify;
-}
-.card p:last-child { margin-bottom: 0; }
-.card a { color: var(--link); text-decoration: none; border-bottom: 1px dotted var(--link); }
-.card a:hover { border-bottom-style: solid; }
-.card strong { color: var(--text); }
+.story + .story { border-top: 1px solid var(--hairline); }
 
-/* 天内导航 */
+.story-num {
+  font-family: var(--serif);
+  font-size: 19px;
+  color: var(--accent);
+  letter-spacing: 1px;
+  font-variant-numeric: tabular-nums;
+  padding-top: 5px;
+}
+
+.story-main { min-width: 0; }
+
+.story h2 {
+  margin: 0 0 10px;
+  font-family: var(--serif);
+  font-size: 21px;
+  font-weight: 700;
+  line-height: 1.6;
+  letter-spacing: 0.5px;
+  text-wrap: balance;
+  padding-right: 26px; /* 给右上角复制图标留出避让空间 */
+}
+.story p {
+  margin: 0 0 10px;
+  color: var(--ink-soft);
+  font-size: 15.5px;
+  line-height: 2;
+  text-align: justify;
+  text-wrap: pretty;
+}
+.story p:last-child { margin-bottom: 0; }
+.story strong {
+  color: var(--ink);
+  font-weight: 600;
+}
+/* 正文引用来源：像纸媒引文一样的下划线，而非蓝色链接 */
+.story a {
+  color: inherit;
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-decoration-color: color-mix(in srgb, var(--accent) 55%, transparent);
+  text-underline-offset: 4px;
+  transition: color 0.15s ease, text-decoration-color 0.15s ease;
+}
+.story a:hover {
+  color: var(--accent);
+  text-decoration-color: currentColor;
+}
+
+/* 条目依次浮现 */
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.story {
+  animation: rise 0.55s cubic-bezier(0.2, 0, 0, 1) backwards;
+  animation-delay: calc(min(var(--i, 0), 8) * 65ms);
+}
+@media (prefers-reduced-motion: reduce) {
+  .story { animation: none; }
+}
+
+/* ── 日期内翻页 ───────────────────────── */
+
 .day-nav {
   display: flex;
   justify-content: space-between;
-  gap: 12px;
-  margin: 32px 0 8px;
+  gap: 16px;
+  border-top: 1px solid var(--hairline);
+  margin-top: 10px;
+  padding: 12px 0 4px;
 }
-.nav-btn {
-  flex: 1;
-  text-align: center;
-  padding: 12px;
-  border: 1px solid var(--border);
-  border-radius: 10px;
-  color: var(--text);
+.nav-link {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  color: var(--ink-soft);
   text-decoration: none;
-  font-size: 14px;
-  background: var(--card);
+  font-size: 14.5px;
+  letter-spacing: 1px;
+  transition: color 0.15s ease;
 }
-.nav-btn:hover { border-color: var(--accent); }
-.nav-btn.disabled { color: var(--faint); cursor: default; }
-.nav-btn.disabled:hover { border-color: var(--border); }
+.nav-link:hover { color: var(--accent); }
+.nav-link.disabled {
+  color: var(--faint);
+  cursor: default;
+}
+.nav-link.disabled:hover { color: var(--faint); }
 
-/* 往期归档 */
-.archive { margin: 44px 0 12px; }
-.archive h2 {
-  font-size: 18px;
-  letter-spacing: 2px;
-  margin-bottom: 14px;
+/* ── 往期归档：目录点线 ────────────────── */
+
+.archive {
+  margin-top: 38px;
+  border-top: 1px solid var(--rule);
 }
-.archive ul { list-style: none; margin: 0; padding: 0; }
-.archive li { border-top: 1px solid var(--border); }
-.archive li:last-child { border-bottom: 1px solid var(--border); }
+.archive-title {
+  margin: 16px 0 4px;
+  font-family: var(--serif);
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: 6px;
+  color: var(--ink);
+}
+.archive ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
 .archive li a {
   display: flex;
   align-items: baseline;
   gap: 12px;
-  padding: 13px 4px;
-  color: var(--text);
+  padding: 13px 2px;
+  color: var(--ink);
   text-decoration: none;
 }
+.arch-date {
+  font-family: var(--serif);
+  color: var(--muted);
+  font-size: 13.5px;
+  letter-spacing: 0.5px;
+  white-space: nowrap;
+}
+.leader {
+  flex: 1;
+  min-width: 24px;
+  border-bottom: 1px dotted var(--faint);
+}
+.arch-title {
+  font-size: 15px;
+  transition: color 0.15s ease;
+}
 .archive li a:hover .arch-title { color: var(--accent); }
-.arch-date { color: var(--faint); font-size: 13px; white-space: nowrap; }
-.arch-title { flex: 1; font-size: 15px; }
 .arch-count {
-  color: var(--accent);
-  font-size: 12px;
-  background: var(--accent-soft);
-  border-radius: 20px;
-  padding: 2px 10px;
+  font-family: var(--serif);
+  color: var(--muted);
+  font-size: 12.5px;
   white-space: nowrap;
 }
 
-/* 页脚 */
-.site-footer {
-  margin-top: 56px;
-  border-top: 1px solid var(--border);
-  padding: 22px 0 34px;
-  color: var(--faint);
-  font-size: 13px;
-  text-align: center;
+/* ── 单条复制 ─────────────────────────── */
+
+.story-copy {
+  position: absolute;
+  top: 36px;
+  right: 0;
+  width: 16px;
+  height: 16px;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--muted);
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 0.15s ease, color 0.15s ease;
+}
+/* 伪元素扩展命中区至约 40px，不占布局 */
+.story-copy::before {
+  content: "";
+  position: absolute;
+  inset: -12px;
+}
+.story:hover .story-copy,
+.story-copy:focus-visible { opacity: 1; }
+.story-copy:hover { color: var(--accent); }
+.story-copy:active .copy-ic { transform: scale(0.96); }
+.story-copy.copied {
+  color: var(--accent);
+  opacity: 1;
 }
 
+.copy-ic {
+  display: grid;
+  width: 16px;
+  height: 16px;
+}
+.copy-ic .ic {
+  grid-area: 1 / 1;
+  width: 100%;
+  height: 100%;
+  transition: opacity 0.2s ease, transform 0.2s cubic-bezier(0.2, 0, 0, 1),
+    filter 0.2s ease;
+}
+.ic-check {
+  opacity: 0;
+  transform: scale(0.25);
+  filter: blur(4px);
+}
+.copied .ic-copy {
+  opacity: 0;
+  transform: scale(0.25);
+  filter: blur(4px);
+}
+.copied .ic-check {
+  opacity: 1;
+  transform: scale(1);
+  filter: blur(0);
+}
+
+/* 触屏设备没有悬停，图标常显 */
+@media (hover: none) {
+  .story-copy { opacity: 0.55; }
+  .story-copy.copied { opacity: 1; }
+}
+
+/* ── 页脚 ─────────────────────────────── */
+
+.site-footer {
+  margin-top: 52px;
+  border-top: 2.5px solid var(--rule);
+  padding: 18px 0 42px;
+  text-align: center;
+  color: var(--faint);
+  font-size: 12.5px;
+  letter-spacing: 1.5px;
+}
+.site-footer p { margin: 0; }
+
+.footer-social {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  margin-top: 2px;
+  color: var(--muted);
+  transition: color 0.15s ease, transform 0.12s ease;
+}
+.footer-social:hover { color: var(--accent); }
+.footer-social:active { transform: scale(0.96); }
+.footer-social svg { width: 15px; height: 15px; }
+
+/* ── 小屏 ─────────────────────────────── */
+
 @media (max-width: 560px) {
-  .day-title { font-size: 24px; }
-  .card { padding: 18px 18px 16px 60px; }
-  .card .num { left: 16px; top: 20px; width: 28px; height: 28px; font-size: 13px; }
+  .masthead { padding-top: 30px; }
+  .masthead-title {
+    font-size: 23px;
+    letter-spacing: 6px;
+    text-indent: 6px;
+  }
+  .masthead-sub { letter-spacing: 3px; text-indent: 3px; }
+  .dateline { margin-top: 22px; }
+  .dateline-in { font-size: 12.5px; }
+  .story {
+    grid-template-columns: 34px 1fr;
+    column-gap: 12px;
+    padding: 22px 0 20px;
+  }
+  .story-num { font-size: 16px; padding-top: 4px; }
+  .story h2 { font-size: 18.5px; padding-right: 22px; }
+  .story p { font-size: 15px; }
+  .story-copy { top: 29px; }
   .arch-date { display: none; }
 }

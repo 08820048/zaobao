@@ -19,7 +19,7 @@ BASE = os.path.dirname(os.path.abspath(__file__))
 # 每日定时任务会把新生成的早报拷进来再重新构建。
 DIGEST_DIR = os.path.join(BASE, "content")
 DIST = os.path.join(BASE, "dist")
-SITE_NAME = "AI 早报"
+SITE_NAME = "MuseAI 早报"
 TAGLINE = "每天早上 · AI 科技资讯"
 
 WEEKDAYS = ["一", "二", "三", "四", "五", "六", "日"]
@@ -28,6 +28,24 @@ ARTICLE_RE = re.compile(r"^\*\*(\d+)\.\s*(.+?)\*\*\s*$")
 TITLE_RE = re.compile(r"^#\s*(.+?)\s*$")
 LINK_RE = re.compile(r"\[([^\]]+)\]\(([^)]+)\)")
 BOLD_RE = re.compile(r"\*\*(.+?)\*\*")
+
+
+def to_plain(text: str) -> str:
+    """markdown 行内语法 → 分享用纯文本：[a](u) 变 a（u），**b** 变 b。"""
+    text = LINK_RE.sub(lambda m: f"{m.group(1)}（{m.group(2)}）", text)
+    text = BOLD_RE.sub(r"\1", text)
+    return text
+
+
+def article_plain_text(a: dict) -> str:
+    """单条早报的分享纯文本：编号 + 标题 + 正文。"""
+    parts = []
+    num = f"{a['num']}." if a["num"] else ""
+    head = f"{num} {to_plain(a['title'])}".strip()
+    if head:
+        parts.append(head)
+    parts.extend(to_plain(p) for p in a["paras"])
+    return "\n".join(parts)
 
 
 def inline_format(text: str) -> str:
@@ -100,17 +118,42 @@ def parse_digest(path: str, date_str: str) -> dict:
         "display_date": f"{dt.month}月{dt.day}日",
         "weekday": f"星期{WEEKDAYS[dt.weekday()]}",
         "full_date": f"{dt.year} 年 {dt.month} 月 {dt.day} 日",
-        "title": title or f"{dt.month}月{dt.day}日 AI 早报",
+        "title": title or f"{dt.month}月{dt.day}日 {SITE_NAME}",
         "articles": articles,
     }
 
 
-def render_article(a: dict) -> str:
-    num = f'<span class="num">{html.escape(a["num"])}</span>' if a["num"] else ""
+def render_article(a: dict, seq: int) -> str:
+    try:
+        num_txt = f"{int(a['num']):02d}"
+    except (TypeError, ValueError):
+        num_txt = str(a["num"] or "")
+    num = f'<span class="story-num" aria-hidden="true">{html.escape(num_txt)}</span>'
     title = f"<h2>{inline_format(a['title'])}</h2>" if a["title"] else ""
     paras = "\n".join(f"<p>{inline_format(p)}</p>" for p in a["paras"])
-    return f'<article class="card">\n{num}\n{title}\n{paras}\n</article>'
+    story_text = (
+        f'<span class="story-text" hidden>{html.escape(article_plain_text(a))}</span>'
+    )
+    return (
+        f'<article class="story" style="--i:{seq}">\n{num}\n'
+        f'<div class="story-main">\n{title}\n{paras}\n{story_text}\n{STORY_COPY}\n</div>\n</article>'
+    )
 
+
+STORY_COPY = (
+    '<button class="story-copy" type="button" aria-label="复制本条早报" title="复制本条早报">'
+    '<span class="copy-ic" aria-hidden="true">'
+    '<svg class="ic ic-copy" viewBox="0 0 24 24" fill="none" stroke="currentColor" '
+    'stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'
+    '<rect x="9" y="9" width="13" height="13" rx="2"/>'
+    '<path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>'
+    '<svg class="ic ic-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" '
+    'stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'
+    '<path d="M20 6L9 17l-5-5"/></svg>'
+    "</span>"
+    '<span class="visually-hidden copy-status" role="status"></span>'
+    "</button>"
+)
 
 PAGE_TMPL = """<!DOCTYPE html>
 <html lang="zh-CN">
@@ -119,32 +162,40 @@ PAGE_TMPL = """<!DOCTYPE html>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>{page_title} · {site}</title>
 <meta name="description" content="{desc}">
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23f2a93b'/%3E%3Ctext x='32' y='42' font-size='28' text-anchor='middle' font-family='sans-serif' font-weight='bold' fill='%23101418'%3EAI%3C/text%3E%3C/svg%3E">
+<meta name="theme-color" content="#f7f3e9" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#16130e" media="(prefers-color-scheme: dark)">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='10' fill='%23b23a2c'/%3E%3Ctext x='32' y='46' font-size='34' text-anchor='middle' font-family='Songti SC, SimSun, serif' font-weight='bold' fill='%23f7f3e9'%3E%E6%97%A9%3C/text%3E%3C/svg%3E">
 <link rel="stylesheet" href="/style.css">
 </head>
 <body>
-<div class="topbar"></div>
-<header class="site-header">
-  <div class="wrap header-in">
-    <a class="brand" href="/">{site}</a>
-    <span class="tagline">{tagline}</span>
+<header class="masthead">
+  <div class="wrap">
+    <p class="masthead-title"><a href="/">{site}</a></p>
+    <p class="masthead-sub">{tagline}</p>
   </div>
+  <div class="dateline"><div class="wrap dateline-in">
+    <span class="dateline-left">{dateline_left}</span>
+    <span class="dateline-right">{dateline_right}</span>
+  </div></div>
 </header>
 <main class="wrap">
+{hidden_h1}
 {body}
 </main>
 <footer class="site-footer">
   <div class="wrap">
-    <p>内容由 Muse 每日自动生成 · 部署于 Cloudflare Pages</p>
+    <p>Made with Cerebellum</p>
+    <a class="footer-social" href="https://x.com/xuyidev" target="_blank" rel="noopener noreferrer" aria-label="在 X 上关注 @xuyidev" title="在 X 上关注 @xuyidev">
+      <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+    </a>
   </div>
 </footer>
+<script src="/site.js"></script>
 </body>
 </html>
 """
 
-DAY_BODY_TMPL = """<p class="date-label">{full_date} · {weekday}</p>
-<h1 class="day-title">{title}</h1>
-<div class="cards">
+DAY_BODY_TMPL = """<div class="stream">
 {cards}
 </div>
 <nav class="day-nav">
@@ -155,21 +206,18 @@ DAY_BODY_TMPL = """<p class="date-label">{full_date} · {weekday}</p>
 
 
 def day_body(d: dict, prev: dict | None, nxt: dict | None) -> str:
-    cards = "\n".join(render_article(a) for a in d["articles"])
+    cards = "\n".join(render_article(a, i + 1) for i, a in enumerate(d["articles"]))
     prev_link = (
-        f'<a class="nav-btn" href="/{prev["date"]}.html">← {prev["display_date"]}</a>'
+        f'<a class="nav-link" href="/{prev["date"]}.html">← {prev["display_date"]}</a>'
         if prev
-        else '<span class="nav-btn disabled">← 更早</span>'
+        else '<span class="nav-link disabled">← 更早</span>'
     )
     next_link = (
-        f'<a class="nav-btn" href="/{nxt["date"]}.html">{nxt["display_date"]} →</a>'
+        f'<a class="nav-link" href="/{nxt["date"]}.html">{nxt["display_date"]} →</a>'
         if nxt
-        else '<a class="nav-btn" href="/">最新 →</a>'
+        else '<a class="nav-link" href="/">最新 →</a>'
     )
     return DAY_BODY_TMPL.format(
-        full_date=d["full_date"],
-        weekday=d["weekday"],
-        title=html.escape(d["title"]),
         cards=cards,
         prev_link=prev_link,
         next_link=next_link,
@@ -178,25 +226,24 @@ def day_body(d: dict, prev: dict | None, nxt: dict | None) -> str:
 
 def index_body(digests: list) -> str:
     latest = digests[-1]
-    cards = "\n".join(render_article(a) for a in latest["articles"])
+    cards = "\n".join(render_article(a, i + 1) for i, a in enumerate(latest["articles"]))
     items = []
     for d in reversed(digests):
         count = len(d["articles"])
         items.append(
             f'<li><a href="/{d["date"]}.html">'
             f'<span class="arch-date">{d["full_date"]} · {d["weekday"]}</span>'
+            f'<span class="leader" aria-hidden="true"></span>'
             f'<span class="arch-title">{html.escape(d["title"])}</span>'
             f'<span class="arch-count">{count} 条</span>'
             f"</a></li>"
         )
     archive = "\n".join(items)
-    return f"""<p class="date-label">{latest["full_date"]} · {latest["weekday"]} · 最新</p>
-<h1 class="day-title">{html.escape(latest["title"])}</h1>
-<div class="cards">
+    return f"""<div class="stream">
 {cards}
 </div>
 <section class="archive">
-  <h2>往期早报</h2>
+  <h2 class="archive-title">往期</h2>
   <ul>
 {archive}
   </ul>
@@ -219,6 +266,14 @@ def build() -> list:
         print("no digests found", file=sys.stderr)
         sys.exit(1)
 
+    if not digests:
+        print("no digests found", file=sys.stderr)
+        sys.exit(1)
+
+    # 按日期先后编期号
+    for i, d in enumerate(digests):
+        d["issue"] = i + 1
+
     if os.path.exists(DIST):
         shutil.rmtree(DIST)
     os.makedirs(DIST)
@@ -233,23 +288,33 @@ def build() -> list:
             site=SITE_NAME,
             tagline=TAGLINE,
             desc=f"{d['full_date']} AI 科技早报，共 {len(d['articles'])} 条重要资讯。",
+            dateline_left=f'{d["full_date"]} · {d["weekday"]}',
+            dateline_right=f'第 {d["issue"]} 期',
+            hidden_h1=f'<h1 class="visually-hidden">{html.escape(d["title"])}</h1>',
             body=body,
         )
         with open(os.path.join(DIST, f"{d['date']}.html"), "w", encoding="utf-8") as f:
             f.write(page)
 
     # 首页：最新一期 + 归档
+    latest = digests[-1]
     index_page = PAGE_TMPL.format(
         page_title="最新",
         site=SITE_NAME,
         tagline=TAGLINE,
         desc="每天早上更新的 AI 科技资讯早报：大模型动态、芯片算力、政策监管、融资并购、开源项目与 AI 应用。",
+        dateline_left=f'{latest["full_date"]} · {latest["weekday"]}',
+        dateline_right=(
+            f'<span class="stamp">最新</span><span>第 {latest["issue"]} 期</span>'
+        ),
+        hidden_h1=f'<h1 class="visually-hidden">{SITE_NAME} — {TAGLINE}</h1>',
         body=index_body(digests),
     )
     with open(os.path.join(DIST, "index.html"), "w", encoding="utf-8") as f:
         f.write(index_page)
 
     shutil.copy(os.path.join(BASE, "style.css"), os.path.join(DIST, "style.css"))
+    shutil.copy(os.path.join(BASE, "site.js"), os.path.join(DIST, "site.js"))
     print(f"built {len(digests)} digests -> {DIST}")
     return digests
 
