@@ -1,0 +1,198 @@
+/* AI 早报 · 深色主题 */
+:root {
+  --bg: #0e1116;
+  --card: #161b23;
+  --border: #262e3a;
+  --text: #e8ecf1;
+  --muted: #98a2b3;
+  --faint: #6b7688;
+  --accent: #f2a93b;
+  --accent-soft: rgba(242, 169, 59, 0.12);
+  --link: #7db8f0;
+  --radius: 14px;
+}
+
+* { box-sizing: border-box; }
+
+html { -webkit-text-size-adjust: 100%; }
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: -apple-system, BlinkMacSystemFont, "PingFang SC",
+    "Hiragino Sans GB", "Microsoft YaHei", "Noto Sans SC", sans-serif;
+  line-height: 1.8;
+  font-size: 16px;
+}
+
+.topbar {
+  height: 3px;
+  background: linear-gradient(90deg, #f2a93b, #e2574c 55%, #7db8f0);
+}
+
+.wrap {
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
+/* 页眉 */
+.site-header {
+  border-bottom: 1px solid var(--border);
+  padding: 18px 0;
+}
+.header-in {
+  display: flex;
+  align-items: baseline;
+  gap: 14px;
+}
+.brand {
+  font-size: 22px;
+  font-weight: 800;
+  letter-spacing: 2px;
+  color: var(--text);
+  text-decoration: none;
+}
+.brand::before {
+  content: "";
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--accent);
+  margin-right: 10px;
+  vertical-align: 1px;
+}
+.tagline {
+  color: var(--faint);
+  font-size: 13px;
+  letter-spacing: 1px;
+}
+
+/* 日期与标题 */
+.date-label {
+  color: var(--accent);
+  font-size: 13px;
+  letter-spacing: 2px;
+  margin: 36px 0 8px;
+}
+.day-title {
+  font-size: 30px;
+  line-height: 1.4;
+  margin: 0 0 28px;
+  letter-spacing: 1px;
+}
+
+/* 资讯卡片 */
+.cards {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+.card {
+  position: relative;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 22px 24px 20px 72px;
+}
+.card .num {
+  position: absolute;
+  left: 22px;
+  top: 24px;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--accent-soft);
+  color: var(--accent);
+  font-weight: 700;
+  font-size: 15px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.card h2 {
+  font-size: 18px;
+  line-height: 1.6;
+  margin: 0 0 10px;
+}
+.card p {
+  margin: 0 0 10px;
+  color: #c9d1dd;
+  font-size: 15px;
+  text-align: justify;
+}
+.card p:last-child { margin-bottom: 0; }
+.card a { color: var(--link); text-decoration: none; border-bottom: 1px dotted var(--link); }
+.card a:hover { border-bottom-style: solid; }
+.card strong { color: var(--text); }
+
+/* 天内导航 */
+.day-nav {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  margin: 32px 0 8px;
+}
+.nav-btn {
+  flex: 1;
+  text-align: center;
+  padding: 12px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  color: var(--text);
+  text-decoration: none;
+  font-size: 14px;
+  background: var(--card);
+}
+.nav-btn:hover { border-color: var(--accent); }
+.nav-btn.disabled { color: var(--faint); cursor: default; }
+.nav-btn.disabled:hover { border-color: var(--border); }
+
+/* 往期归档 */
+.archive { margin: 44px 0 12px; }
+.archive h2 {
+  font-size: 18px;
+  letter-spacing: 2px;
+  margin-bottom: 14px;
+}
+.archive ul { list-style: none; margin: 0; padding: 0; }
+.archive li { border-top: 1px solid var(--border); }
+.archive li:last-child { border-bottom: 1px solid var(--border); }
+.archive li a {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  padding: 13px 4px;
+  color: var(--text);
+  text-decoration: none;
+}
+.archive li a:hover .arch-title { color: var(--accent); }
+.arch-date { color: var(--faint); font-size: 13px; white-space: nowrap; }
+.arch-title { flex: 1; font-size: 15px; }
+.arch-count {
+  color: var(--accent);
+  font-size: 12px;
+  background: var(--accent-soft);
+  border-radius: 20px;
+  padding: 2px 10px;
+  white-space: nowrap;
+}
+
+/* 页脚 */
+.site-footer {
+  margin-top: 56px;
+  border-top: 1px solid var(--border);
+  padding: 22px 0 34px;
+  color: var(--faint);
+  font-size: 13px;
+  text-align: center;
+}
+
+@media (max-width: 560px) {
+  .day-title { font-size: 24px; }
+  .card { padding: 18px 18px 16px 60px; }
+  .card .num { left: 16px; top: 20px; width: 28px; height: 28px; font-size: 13px; }
+  .arch-date { display: none; }
+}
