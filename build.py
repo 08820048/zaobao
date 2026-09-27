@@ -189,10 +189,12 @@ PAGE_TMPL = """<!DOCTYPE html>
     <p class="masthead-title"><a href="/">{site}</a></p>
     <p class="masthead-sub">{tagline}</p>
   </div>
-  <div class="dateline"><div class="wrap dateline-in">
-    <span class="dateline-left">{dateline_left}</span>
-    <span class="dateline-right">{dateline_right}</span>
-  </div></div>
+  <div class="dateline">
+    <div class="wrap"><div class="dateline-in">
+      <span class="dateline-left">{dateline_left}</span>
+      <span class="dateline-right">{dateline_right}</span>
+    </div></div>
+  </div>
 </header>
 <div class="wrap layout">
   <aside class="rail">
@@ -207,12 +209,12 @@ PAGE_TMPL = """<!DOCTYPE html>
   </main>
 </div>
 <footer class="site-footer">
-  <div class="wrap">
+  <div class="wrap"><div class="footer-in">
     <p>Made with Cerebellum</p>
     <a class="footer-social" href="https://x.com/xuyidev" target="_blank" rel="noopener noreferrer" aria-label="在 X 上关注 @xuyidev" title="在 X 上关注 @xuyidev">
       <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
     </a>
-  </div>
+  </div></div>
 </footer>
 <script src="/site.js"></script>
 </body>
