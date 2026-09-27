@@ -155,6 +155,22 @@ STORY_COPY = (
     "</button>"
 )
 
+def issue_rail_html(digests: list, current_date: str) -> str:
+    """左侧竖排期刊栏：新刊在上，标出当前页对应的一期。"""
+    items = []
+    for d in reversed(digests):
+        is_cur = d["date"] == current_date
+        cls = "rail-item is-current" if is_cur else "rail-item"
+        cur = ' aria-current="page"' if is_cur else ""
+        items.append(
+            f'<li><a class="{cls}" href="/{d["date"]}.html"{cur}>'
+            f'<span class="rail-date">{d["display_date"]}</span>'
+            f'<span class="rail-sub">{d["weekday"]} · {len(d["articles"])} 条</span>'
+            f"</a></li>"
+        )
+    return "\n".join(items)
+
+
 PAGE_TMPL = """<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
@@ -178,10 +194,18 @@ PAGE_TMPL = """<!DOCTYPE html>
     <span class="dateline-right">{dateline_right}</span>
   </div></div>
 </header>
-<main class="wrap">
+<div class="wrap layout">
+  <aside class="rail">
+    <h2 class="rail-title">往期</h2>
+    <ul>
+{issue_rail}
+    </ul>
+  </aside>
+  <main class="main-col">
 {hidden_h1}
 {body}
-</main>
+  </main>
+</div>
 <footer class="site-footer">
   <div class="wrap">
     <p>Made with Cerebellum</p>
@@ -227,27 +251,9 @@ def day_body(d: dict, prev: dict | None, nxt: dict | None) -> str:
 def index_body(digests: list) -> str:
     latest = digests[-1]
     cards = "\n".join(render_article(a, i + 1) for i, a in enumerate(latest["articles"]))
-    items = []
-    for d in reversed(digests):
-        count = len(d["articles"])
-        items.append(
-            f'<li><a href="/{d["date"]}.html">'
-            f'<span class="arch-date">{d["full_date"]} · {d["weekday"]}</span>'
-            f'<span class="leader" aria-hidden="true"></span>'
-            f'<span class="arch-title">{html.escape(d["title"])}</span>'
-            f'<span class="arch-count">{count} 条</span>'
-            f"</a></li>"
-        )
-    archive = "\n".join(items)
     return f"""<div class="stream">
 {cards}
 </div>
-<section class="archive">
-  <h2 class="archive-title">往期</h2>
-  <ul>
-{archive}
-  </ul>
-</section>
 """
 
 
@@ -290,6 +296,7 @@ def build() -> list:
             desc=f"{d['full_date']} AI 科技早报，共 {len(d['articles'])} 条重要资讯。",
             dateline_left=f'{d["full_date"]} · {d["weekday"]}',
             dateline_right=f'第 {d["issue"]} 期',
+            issue_rail=issue_rail_html(digests, d["date"]),
             hidden_h1=f'<h1 class="visually-hidden">{html.escape(d["title"])}</h1>',
             body=body,
         )
@@ -307,6 +314,7 @@ def build() -> list:
         dateline_right=(
             f'<span class="stamp">最新</span><span>第 {latest["issue"]} 期</span>'
         ),
+        issue_rail=issue_rail_html(digests, latest["date"]),
         hidden_h1=f'<h1 class="visually-hidden">{SITE_NAME} — {TAGLINE}</h1>',
         body=index_body(digests),
     )

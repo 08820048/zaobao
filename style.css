@@ -56,10 +56,20 @@ a:focus-visible {
 }
 
 .wrap {
-  max-width: 720px;
+  max-width: 940px;
   margin: 0 auto;
   padding: 0 22px;
 }
+
+/* 版心：左期刊栏 + 右正文 */
+.layout {
+  display: grid;
+  grid-template-columns: 168px minmax(0, 1fr);
+  gap: 0 44px;
+  align-items: start;
+  padding-top: 24px;
+}
+.main-col { min-width: 0; }
 
 .visually-hidden {
   position: absolute;
@@ -242,55 +252,89 @@ a:focus-visible {
 }
 .nav-link.disabled:hover { color: var(--faint); }
 
-/* ── 往期归档：目录点线 ────────────────── */
+/* ── 往期期刊侧栏 ─────────────────────── */
 
-.archive {
-  margin-top: 38px;
-  border-top: 1px solid var(--rule);
+.rail {
+  position: sticky;
+  top: 28px;
 }
-.archive-title {
-  margin: 16px 0 4px;
+.rail-title {
+  margin: 5px 0 0;
+  padding-bottom: 9px;
+  border-bottom: 1px solid var(--rule);
   font-family: var(--serif);
-  font-size: 15px;
+  font-size: 14px;
   font-weight: 700;
   letter-spacing: 6px;
   color: var(--ink);
 }
-.archive ul {
+.rail ul {
   list-style: none;
   margin: 0;
   padding: 0;
 }
-.archive li a {
-  display: flex;
-  align-items: baseline;
-  gap: 12px;
-  padding: 13px 2px;
-  color: var(--ink);
+.rail li + li { border-top: 1px solid var(--hairline); }
+.rail-item {
+  display: block;
+  padding: 11px 0;
   text-decoration: none;
 }
-.arch-date {
+.rail-date {
+  display: block;
   font-family: var(--serif);
-  color: var(--muted);
-  font-size: 13.5px;
-  letter-spacing: 0.5px;
-  white-space: nowrap;
-}
-.leader {
-  flex: 1;
-  min-width: 24px;
-  border-bottom: 1px dotted var(--faint);
-}
-.arch-title {
   font-size: 15px;
+  letter-spacing: 1px;
+  color: var(--ink);
+  font-variant-numeric: tabular-nums;
   transition: color 0.15s ease;
 }
-.archive li a:hover .arch-title { color: var(--accent); }
-.arch-count {
-  font-family: var(--serif);
+.rail-sub {
+  display: block;
+  margin-top: 3px;
+  font-size: 12px;
+  letter-spacing: 1px;
   color: var(--muted);
-  font-size: 12.5px;
-  white-space: nowrap;
+}
+.rail-item:hover .rail-date { color: var(--accent); }
+/* 当前一期：朱砂日期 + 左侧细条标记 */
+.rail-item.is-current {
+  box-shadow: inset 2px 0 0 var(--accent);
+  padding-left: 12px;
+  margin-left: -14px;
+}
+.rail-item.is-current .rail-date { color: var(--accent); }
+
+/* ── 中屏以下：期刊栏变横滑条 ──────────── */
+
+@media (max-width: 820px) {
+  .layout {
+    display: block;
+    padding-top: 18px;
+  }
+  .rail { position: static; }
+  .rail-title {
+    margin-bottom: 4px;
+    padding-bottom: 0;
+    border-bottom: 0;
+    letter-spacing: 4px;
+  }
+  .rail ul {
+    display: flex;
+    gap: 0 22px;
+    overflow-x: auto;
+    padding: 0 0 10px;
+    border-bottom: 1px solid var(--hairline);
+    -webkit-overflow-scrolling: touch;
+  }
+  .rail li + li { border-top: 0; }
+  .rail-item { display: inline-block; padding: 6px 0; }
+  .rail-item.is-current {
+    box-shadow: none;
+    padding-left: 0;
+    margin-left: 0;
+  }
+  .rail-sub { display: none; }
+  .rail-date { font-size: 14px; }
 }
 
 /* ── 单条复制 ─────────────────────────── */
